@@ -1,21 +1,30 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.builder.BuildingSearchBuilder;
+import com.javaweb.converter.BuildingConverter;
+import com.javaweb.converter.BuildingSearchBuilderConverter;
+import com.javaweb.entity.AssignmentBuildingEntity;
 import com.javaweb.entity.BuildingEntity;
 import com.javaweb.entity.RentareaEntity;
 import com.javaweb.entity.UserEntity;
 import com.javaweb.model.dto.BuildingDTO;
 import com.javaweb.model.request.BuildingSearchRequest;
+import com.javaweb.model.response.BuildingSearchResponse;
 import com.javaweb.model.response.ResponseDTO;
 import com.javaweb.model.response.StaffResponseDTO;
+import com.javaweb.repository.AssignmentBuildingRepository;
 import com.javaweb.repository.BuildingRepository;
 import com.javaweb.repository.RentAreaRepository;
 import com.javaweb.repository.UserRepository;
+import com.javaweb.service.AssignmentBuildingService;
 import com.javaweb.service.IBuildingService;
+import com.javaweb.service.RentAreaService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,44 +37,49 @@ public class BuildingServiceImpl implements IBuildingService {
   @Autowired
   private UserRepository userRepository;
 
+  @Autowired
+  private BuildingSearchBuilderConverter buildingSearchBuilderConverter;
 
   @Autowired
-  private RentAreaRepository rentAreaRepository;
+  private BuildingConverter buildingConverter;
+
+  @Autowired
+  private AssignmentBuildingRepository assignmentBuildingRepository;
+
+  @Autowired
+  private RentAreaService rentAreaService;
+
+  @Autowired
+  private AssignmentBuildingService assignmentBuildingService;
+
+  @Autowired
+  private ModelMapper modelMapper;
 
   @Override
-  public List<BuildingDTO> getAllBuildings(BuildingSearchRequest buildingSearchRequest) {
+  public List<BuildingSearchResponse> getAllBuildings(BuildingSearchRequest buildingSearchRequest) {
+    List<String> typeCode = buildingSearchRequest.getTypeCode();
+    BuildingSearchBuilder buildingSearchBuilder = buildingSearchBuilderConverter.toBuildingSearchBuilder(buildingSearchRequest,typeCode);
 
-    List<BuildingDTO> buildingDTOList = new ArrayList<>();
-    List<BuildingEntity> buildingEntities = buildingRepository.findAll();
-
-    for (BuildingEntity buildingEntity : buildingEntities) {
-      BuildingDTO buildingDTO = new BuildingDTO();
-//      buildingDTO = modelMapper.map(buildingEntity, BuildingDTO.class);
-      buildingDTO.setId(buildingEntity.getId());
-      buildingDTO.setName(buildingEntity.getName());
-      buildingDTO.setWard(buildingEntity.getWard());
-      buildingDTO.setStreet(buildingEntity.getStreet());
-      buildingDTO.setDistrict(buildingEntity.getDistrict());
-      buildingDTO.setFloorarea(buildingEntity.getFloorarea());
-      buildingDTO.setManagername(buildingEntity.getManagername());
-      buildingDTO.setManagerphone(buildingEntity.getManagerphone());
-
-      List<RentareaEntity> rentareaEntities = buildingEntity.getRentareaList();
-      String rentArea = rentareaEntities.stream().map(it -> it.getValue().toString()).collect(Collectors.joining(","));
-      buildingDTO.setRentarea(rentArea);
-      buildingDTO.setDirection(buildingEntity.getDirection());
-      buildingDTO.setRentpricedescription(buildingEntity.getRentpricedescription());
-      buildingDTO.setNumberofbasement(buildingEntity.getNumberofbasement());
-      buildingDTOList.add(buildingDTO);
+    List<BuildingSearchResponse> result = new ArrayList<>();
+    List<BuildingEntity> buildingEntities = buildingRepository.getAllBuildings(buildingSearchBuilder);
+    for(BuildingEntity buildingEntity : buildingEntities) {
+      BuildingSearchResponse buildingSearchResponse = buildingConverter.toBuildingSearchResponse(buildingEntity);
+      result.add(buildingSearchResponse);
     }
-    return buildingDTOList;
+    return result;
   }
 
   @Override
   public ResponseDTO listStaff(Long buildingid) {
     BuildingEntity building = buildingRepository.findById(buildingid).get();
     List<UserEntity> staffs = userRepository.findByStatusAndRoles_Code(1, "STAFF");
-    List<UserEntity> staffAssignment = building.getUserEntities();
+//    List<UserEntity> staffAssignment = building.getUserEntities();
+    List<UserEntity> staffAssignment = new ArrayList<>();
+
+    List<AssignmentBuildingEntity> assignmentBuildingEntities = assignmentBuildingRepository.findBybuildingEntity(building);
+    for(AssignmentBuildingEntity item : assignmentBuildingEntities) {
+      staffAssignment.add(item.getStaffs());
+    }
 
     List<StaffResponseDTO> staffResponseDTOList = new ArrayList<>();
     for(UserEntity it : staffs){
@@ -87,4 +101,36 @@ public class BuildingServiceImpl implements IBuildingService {
     return responseDTO;
   }
 
+  @Override
+  public void deleteBuildingList(List<Long> buildingids) {
+    assignmentBuildingService.deleteAssignmentBuildingByBuildingId(buildingids);
+    rentAreaService.deleteRentAreaByBuildingId(buildingids);
+    buildingRepository.deleteByIdIn(buildingids);
+  }
+
+  @Override
+  public void addorUpdateBuiling(BuildingDTO buildingDTO) {
+    BuildingEntity buildingEntity = modelMapper.map(buildingDTO, BuildingEntity.class);
+    buildingEntity.setType(toType(buildingDTO.getTypeCode()));
+    buildingRepository.save(buildingEntity);
+    buildingDTO.setId(buildingEntity.getId());
+    if(buildingDTO.getRentarea() != "" && buildingDTO.getRentarea() != null) {
+      rentAreaService.addRentArea(buildingDTO);
+    }
+  }
+
+  @Override
+  public BuildingDTO getBuildingById(Long buildingid) {
+     BuildingEntity buildingEntity = buildingRepository.findById(buildingid).get();
+     BuildingDTO buildingDTO = modelMapper.map(buildingEntity, BuildingDTO.class);
+     buildingDTO.setRentarea(rentAreaService.getRentAreaByBuildingId(buildingid));
+     String[] t = buildingEntity.getType().split(",");
+     List<String> typeCode =Arrays.asList(t);
+     buildingDTO.setTypeCode(typeCode);
+     return buildingDTO;
+  }
+
+  public static String toType(List<String> typeCode){
+    return typeCode.stream().collect(Collectors.joining(","));
+  }
 }

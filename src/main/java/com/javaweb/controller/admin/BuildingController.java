@@ -42,30 +42,7 @@ public class BuildingController {
     modelAndView.addObject("typeCode", BuildingType.type());
 
     // truy vấn
-    List<BuildingDTO> result = buildingService.getAllBuildings(buildingSearchRequest);
-
-//    List<BuildingSearchResponse> result = new ArrayList<>();
-//    BuildingSearchResponse b = new BuildingSearchResponse();
-//    b.setId(1L);
-//    b.setAddress("2,hoang ha,HN");
-//    b.setFloorArea(20L);
-//    b.setManagerName("Anh Long,chi Huong");
-//    b.setManagerPhoneNumber("5091218251");
-//    b.setNumberOfBasement(5L);
-//    b.setRentArea("300,400,500");
-//    result.add(b);
-//
-//    BuildingSearchResponse c = new BuildingSearchResponse();
-//    c.setId(2L);
-//    c.setAddress("2,Cau giay,HN");
-//    c.setFloorArea(25L);
-//    c.setManagerName("Anh Long");
-//    c.setManagerPhoneNumber("5091218224251");
-//    c.setNumberOfBasement(5L);
-//    c.setRentArea("400,500");
-//    result.add(c);
-
-    // hiện thị kết quả
+    List<BuildingSearchResponse> result = buildingService.getAllBuildings(buildingSearchRequest);
     modelAndView.addObject("result", result);
     return modelAndView;
   }
@@ -82,9 +59,7 @@ public class BuildingController {
   public ModelAndView buildingEdit(@PathVariable("id") Long id, HttpServletRequest request) {
     ModelAndView modelAndView = new ModelAndView("admin/building/edit");
     //xuong db tìm building in ra
-    BuildingDTO b = new BuildingDTO();
-    b.setId(id);
-    b.setName("ACE building");
+    BuildingDTO b = buildingService.getBuildingById(id);
     modelAndView.addObject("buildingEdit", b);
     modelAndView.addObject("districtCode", DistrictCode.type());
     modelAndView.addObject("typeCode", BuildingType.type());

@@ -11,7 +11,7 @@ public class RentareaEntity {
   private Long id;
 
   @Column(name = "value")
-  private String value;
+  private Long value;
 
   @ManyToOne
   @JoinColumn(name = "buildingid")
@@ -37,11 +37,11 @@ public class RentareaEntity {
     this.id = id;
   }
 
-  public String getValue() {
+  public Long getValue() {
     return value;
   }
 
-  public void setValue(String value) {
+  public void setValue(Long value) {
     this.value = value;
   }
 

@@ -58,7 +58,7 @@ public class BuildingEntity {
   private String overtimefee;
 
   @Column(name = "brokeragefee")
-  private String brokeragefee;
+  private Double brokeragefee;
 
   @Column(name = "managername")
   private String managername;
@@ -72,13 +72,13 @@ public class BuildingEntity {
   @Column(name = "type")
   private String type;
 
-//  @OneToMany(mappedBy = "buildingEntity", fetch = FetchType.LAZY)
-//  private List<AssignmentBuildingEntity> assignmentBuildingList = new ArrayList<>();
+  @OneToMany(mappedBy = "buildingEntity", fetch = FetchType.LAZY)
+  private List<AssignmentBuildingEntity> assignmentBuildingList = new ArrayList<>();
 
-  @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(name = "assignmentbuilding", joinColumns = @JoinColumn(name = "buildingid", nullable = false),
-                                          inverseJoinColumns = @JoinColumn(name = "staffid", nullable = false))
-  private List<UserEntity> userEntities = new ArrayList<>();
+//  @ManyToMany(fetch = FetchType.LAZY)
+//  @JoinTable(name = "assignmentbuilding", joinColumns = @JoinColumn(name = "buildingid", nullable = false),
+//                                          inverseJoinColumns = @JoinColumn(name = "staffid", nullable = false))
+//  private List<UserEntity> userEntities = new ArrayList<>();
 
   public String getType() {
     return type;
@@ -88,13 +88,21 @@ public class BuildingEntity {
     this.type = type;
   }
 
-  public List<UserEntity> getUserEntities() {
-    return userEntities;
+  public List<AssignmentBuildingEntity> getAssignmentBuildingList() {
+    return assignmentBuildingList;
   }
 
-  public void setUserEntities(List<UserEntity> userEntities) {
-    this.userEntities = userEntities;
+  public void setAssignmentBuildingList(List<AssignmentBuildingEntity> assignmentBuildingList) {
+    this.assignmentBuildingList = assignmentBuildingList;
   }
+
+  //  public List<UserEntity> getUserEntities() {
+//    return userEntities;
+//  }
+//
+//  public void setUserEntities(List<UserEntity> userEntities) {
+//    this.userEntities = userEntities;
+//  }
 
   public Long getFloorarea() {
     return floorarea;
@@ -224,11 +232,11 @@ public class BuildingEntity {
     this.overtimefee = overtimefee;
   }
 
-  public String getBrokeragefee() {
+  public Double getBrokeragefee() {
     return brokeragefee;
   }
 
-  public void setBrokeragefee(String brokeragefee) {
+  public void setBrokeragefee(Double brokeragefee) {
     this.brokeragefee = brokeragefee;
   }
 

@@ -77,8 +77,8 @@
 
                     <div class="col-xs-12">
                       <div class="col-xs-4">
-                        <label for="numberofbasement">Số tầng hầm</label>
-                        <form:input type="number" id="numberofbasement" name="numberofbasement" class="form-control" path="numberOfBasement"/>
+                        <label for="numberOfBasement">Số tầng hầm</label>
+                        <form:input type="number" id="numberOfBasement" name="numberOfBasement" class="form-control" path="numberOfBasement"/>
                       </div>
                       <div class="col-xs-4">
                         <label for="direction">Hướng</label>
@@ -93,34 +93,34 @@
                     <div class="col-xs-12">
                       <div class="col-xs-3">
                         <label for="areafrom">Diện tích từ</label>
-                        <form:input type="text" id="areafrom" name="areafrom" class="form-control" path="areaFrom"/>
+                        <form:input type="text" id="areafrom" name="areaFrom" class="form-control" path="areaFrom"/>
                       </div>
                       <div class="col-xs-3">
                         <label for="areato">Diện tích đến</label>
-                        <form:input type="text" id="areato" name="areato" class="form-control" path="areaTo"/>
+                        <form:input type="text" id="areato" name="areaTo" class="form-control" path="areaTo"/>
                       </div>
                       <div class="col-xs-3">
                         <label for="rentpricefrom">Giá thuê từ</label>
-                        <form:input type="number" id="rentpricefrom" name="rentpricefrom" class="form-control" path="rentPriceFrom"/>
+                        <form:input type="number" id="rentpricefrom" name="rentPriceFrom" class="form-control" path="rentPriceFrom"/>
                       </div>
                       <div class="col-xs-3">
                         <label for="rentpriceto">Giá thuê đến</label>
-                        <form:input type="number" id="rentpriceto" name="rentpriceto" class="form-control" path="rentPriceTo" />
+                        <form:input type="number" id="rentpriceto" name="rentPriceTo" class="form-control" path="rentPriceTo" />
                       </div>
                     </div>
 
                     <div class="col-xs-12">
                       <div class="col-xs-4">
                         <label for="managername">Tên quản lý</label>
-                        <form:input type="text" id="managername" name="managername" class="form-control" path="managerName"/>
+                        <form:input type="text" id="managername" name="managerName" class="form-control" path="managerName"/>
                       </div>
                       <div class="col-xs-4">
                         <label for="managerphone">Điện thoại quản lý</label>
-                        <form:input type="text"  id="managerphone" name="managerphone" class="form-control" path="managerPhone"/>
+                        <form:input type="text"  id="managerphone" name="managerPhone" class="form-control" path="managerPhone"/>
                       </div>
                       <div class="col-xs-2">
                         <label for="staff">Nhân viên phụ trách</label>
-                        <form:select name="staffid" id="staff" class="form-control" path="staffId">
+                        <form:select name="staffId" id="staff" class="form-control" path="staffId">
                           <form:option value="">--Chọn nhân viên--</form:option>
                           <form:options items="${listStaffs}" />
                         </form:select>
@@ -188,19 +188,13 @@
                   <td class="center">
                     ${item.name}
                   </td>
-                  <c:if test="${not empty item.street}">
-                    <td>${item.street},${item.ward},${item.district}</td>
-                  </c:if>
-                  <c:if test="${empty item.street}">
-                    <td></td>
-                  </c:if>
-                  <td>${item.numberofbasement}</td>
-                  <td>${item.managername}</td>
-                  <td>${item.managerphone}</td>
-                  <td>${item.floorarea}</td>
+                  <td>${item.address}</td>
+                  <td>${item.numberOfBasement}</td>
+                  <td>${item.managerName}</td>
+                  <td>${item.managerPhone}</td>
+                  <td>${item.floorArea}</td>
                   <td></td>
-                  <td>${item.rentarea}</td>
-
+                  <td>${item.rentArea}</td>
                   <td></td>
 
                   <td>
@@ -305,12 +299,28 @@
     $('#btnAsignmentbuilding').click((e) => {
         e.preventDefault();
         var data = {};
-        data['buildingid'] = $('#buildingid').val();
+        data['buildingId'] = $('#buildingid').val();
         var staffs = $('#stafflist').find('tbody input[type = checkbox]:checked').map(function(){
             return $(this).val();
         }).get();
-        data['staffid'] = staffs;
+        data['staffs'] = staffs;
+        addAssignmentBuilding(data);
     });
+
+    function addAssignmentBuilding(data){
+        $.ajax({
+          type: "POST",
+          url: "${buildingAPI}",
+          data: JSON.stringify(data), // định dạng data gửi đi
+          contentType: "Application/JSON", // định dạng data gửi đi
+          success: function () {
+              window.location.href="<c:url value="/admin/building-list?message=success"/>";
+          },
+          error: function () {
+              window.location.href="<c:url value="/admin/building-list?message=error"/>";
+          }
+        });
+    }
 
     $('#btnSearchbuilding').click((e) => {
       e.preventDefault();
@@ -339,13 +349,11 @@
         url: "${buildingAPI}/" + data,
         data: JSON.stringify(data), // định dạng data gửi đi
         contentType: "Application/JSON", // định dạng data gửi đi
-        dataType: JSON, //định dạng data server gửi về
-        success: function (respond) {
-            console.log("success");
+        success: function () {
+            window.location.href="<c:url value="/admin/building-list?message=success"/>";
         },
-        error: function (respond) {
-            console.log("failed");
-            console.log(respond);
+        error: function () {
+            window.location.href="<c:url value="/admin/building-list?message=error"/>";
         }
       });
     }

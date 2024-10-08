@@ -138,7 +138,7 @@
                 <div class="form-group">
                   <label class="col-xs-2">Loại tòa nhà</label>
                   <div class="col-xs-6">
-                    <form:checkboxes items="${typeCode}" path="typeCode" id="typeCode" />
+                    <form:checkboxes items="${typeCode}" path="typeCode"/>
                   </div>
                 </div>
                 <div class="form-group">
@@ -177,30 +177,31 @@
           var typeCode = [];
           var formData = $('#listForm').serializeArray();
           $.each(formData, (index,value) => {
-              if(value.name != 'typeCode'){
-                  data["" + value.name + ""] = value.value;
-              }
-              else{
-                  typeCode.push(value.value);
+              if(value.name != "_typeCode"){
+                if(value.name != 'typeCode'){
+                    data["" + value.name + ""] = value.value;
+                }
+                else{
+                    typeCode.push(value.value);
+                }
               }
           });
-          data['typdeCode'] = typeCode;
-
-          // call api
-          $.ajax({
-              type: "POST",
-              url: "${buildingAPI}",
-              data: JSON.stringify(data), // định dạng data gửi đi
-              contentType: "Application/JSON", // định dạng data gửi đi
-              dataType: JSON, //định dạng data server gửi về
-              success: function (respond) {
-                  console.log("success");
-              },
-              error: function (respond) {
-                  console.log("failed");
-                  console.log(respond);
-              }
-          })
+          data['typeCode'] = typeCode;
+          if(data.typeCode != ""){
+              $.ajax({
+                type: "PUT",
+                url: "${buildingAPI}",
+                data: JSON.stringify(data), // định dạng data gửi đi
+                contentType: "Application/JSON", // định dạng data gửi đi
+                // dataType: JSON, //định dạng data server gửi về
+                success: function () {
+                    window.location.href="<c:url value="/admin/building-edit?message=success"/>";
+                },
+                error: function () {
+                    window.location.href="<c:url value="/admin/building-edit?message=error"/>";
+                }
+              });
+          }
       });
 
       $('#btnCancelAddOrUpdateBuilding').click(function (){

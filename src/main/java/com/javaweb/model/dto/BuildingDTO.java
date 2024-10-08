@@ -25,6 +25,14 @@ public class BuildingDTO extends AbstractDTO{
     private String note;
     private List<String> typeCode;
 
+    public List<String> getTypeCode() {
+        return typeCode;
+    }
+
+    public void setTypeCode(List<String> typeCode) {
+        this.typeCode = typeCode;
+    }
+
     public String getNote() {
         return note;
     }
@@ -167,13 +175,5 @@ public class BuildingDTO extends AbstractDTO{
 
     public void setManagerphone(String managerphone) {
         this.managerphone = managerphone;
-    }
-
-    public List<String> getTypeCode() {
-        return typeCode;
-    }
-
-    public void setTypeCode(List<String> typeCode) {
-        this.typeCode = typeCode;
     }
 }
